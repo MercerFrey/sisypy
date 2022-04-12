@@ -12,17 +12,17 @@ class Hero(object):
         self.actor = self.environment.spawn_hero(
             blueprint_filter=environment.args.filter
         )
-        self.actor.set_autopilot(True, environment.args.tm_port)
+        #self.actor.set_autopilot(True, environment.args.tm_port)
 
     def tick(self):
         pass
 
         # Uncomment and modify to control manually, disable autopilot too
-        #
-        # ctrl = carla.VehicleControl()
-        # ctrl.throttle = 0.5
-        # ctrl.steer = 0.1
-        # self.actor.apply_control(ctrl)
+        
+        ctrl = carla.VehicleControl()
+        ctrl.throttle = 0.0
+        ctrl.steer = 0.1
+        self.actor.apply_control(ctrl)
 
     def destroy(self):
         """Destroy the hero actor when class instance is destroyed"""
