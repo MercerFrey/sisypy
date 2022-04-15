@@ -46,7 +46,8 @@ def game_loop(args):
         input_control.start(hud, world)
         world.start(input_control)
 
-        [actor.start(world) for actor in actors]
+        for actor in actors:
+            actor.start(world) 
 
         # Game loop
         clock = pygame.time.Clock()
@@ -55,7 +56,8 @@ def game_loop(args):
 
             # Tick all modules
             world.tick(clock)
-            [actor.tick(clock) for actor in actors]
+            for actor in actors:
+                actor.tick(clock)
         
             hud.tick(clock)
             input_control.tick(clock)
@@ -72,7 +74,9 @@ def game_loop(args):
         print("\nCancelled by user. Bye!")
 
     finally:
-        [actor.destroy() for actor in actors if actor is not None]
+         for actor in actors:
+            if actor is not None:
+                actor.destroy()
 
 
 
