@@ -43,8 +43,7 @@ class Hero(object):
 
         self.actor.apply_control(ctrl)
         
-        # TODO add argument to print snapshots
-        utils.snapshot_printer("log.txt", self.world.world)
+
 
 
     def destroy(self):

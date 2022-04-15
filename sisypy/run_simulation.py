@@ -11,6 +11,7 @@ from hero_with_controller import Hero
 from other_with_controller import Other
 
 from color import *
+import utils
 
 
 def game_loop(args):
@@ -69,6 +70,11 @@ def game_loop(args):
             input_control.render(display)
 
             pygame.display.flip()
+
+            # if logfile specified prints logs to the file
+            if args.logfile:
+                utils.snapshot_printer(args.logfile, world.world)
+                
 
     except KeyboardInterrupt:
         print("\nCancelled by user. Bye!")
@@ -162,6 +168,12 @@ def main():
         metavar="scenario_1.json",
         default="examples/scenario_1.json",
         help='scenario file',
+    )
+
+    argparser.add_argument(
+        "--logfile",
+        metavar="logs.txt",
+        help="in order to print logs into the logfile",
     )
 
 
