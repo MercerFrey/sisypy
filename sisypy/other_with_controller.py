@@ -46,24 +46,3 @@ class Other(object):
         """Destroy the hero actor when class instance is destroyed"""
         if self.actor is not None:
             self.actor.destroy()
-
-    def ttc(self, actor_id):
-        
-        other_vehicle = self.world.world.get_actor(actor_id)
-        if other_vehicle is None:
-            return math.inf
-        ### if the second car is moving 
-        
-        distance = self.actor.get_location().distance(other_vehicle.get_location())
-        
-        speed_difference = (self.calculate_speed(self.actor.get_velocity()) 
-                            - self.calculate_speed(other_vehicle.get_velocity())
-                            )
-        try :
-            return abs(distance / speed_difference)
-        except ZeroDivisionError:
-            return math.inf
-
-
-    def calculate_speed(self, vehicle_speed):
-        return math.sqrt(vehicle_speed.x**2 + vehicle_speed.y**2 + vehicle_speed.z**2)

@@ -160,7 +160,7 @@ def main():
     argparser.add_argument(
         "--scenario",
         metavar="scenario_1.json",
-        default="scenario_1.json",
+        default="examples/scenario_1.json",
         help='scenario file',
     )
 
