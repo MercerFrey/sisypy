@@ -1,7 +1,5 @@
-from turtle import distance
 import carla
 import math
-from matplotlib.backend_bases import LocationEvent
 
 from controller import PurePursuitController
 
