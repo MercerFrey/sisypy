@@ -14,11 +14,7 @@ class Hero(object):
         )
         #self.actor.set_autopilot(True, environment.args.tm_port)
 
-    def tick(self):
-        pass
-
-        # Uncomment and modify to control manually, disable autopilot too
-        
+    def tick(self):        
         ctrl = carla.VehicleControl()
         ctrl.throttle = 0.0
         ctrl.steer = 0.1

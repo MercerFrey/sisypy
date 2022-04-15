@@ -32,18 +32,7 @@ class Other(object):
         # self.actor.set_autopilot(True, world.args.tm_port)
 
     def tick(self, clock):
-        if self.target_speed == 0:
-            return
-
-        if self.ttc(self.actor.id + 1) < 3 and self.tick_count < 4:
-            self.tick_count += 1
-            print(self.actor.get_location())
-            ctrl = carla.VehicleControl()
-            ctrl.throttle = 0
-            ctrl.steer = -1
-            self.actor.apply_control(ctrl)
-            return
-
+        ctrl = carla.VehicleControl()
         throttle, steer = self.controller.get_control(
             self.actor,
             self.waypoints,
@@ -51,7 +40,6 @@ class Other(object):
             self.world.fixed_delta_seconds,
         )
 
-        ctrl = carla.VehicleControl()
         ctrl.throttle = throttle
         ctrl.steer = steer
         self.actor.apply_control(ctrl)

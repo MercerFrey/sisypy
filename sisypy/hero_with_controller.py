@@ -39,33 +39,13 @@ class Hero(object):
         self.world.fixed_delta_seconds,
         )
 
-        tick_dict = {"scenario_1.json": 155,
-                    "scenario_2.json": 80,
-                    "scenario_3.json": 110,
-                    "scenario_4.json": 100,
-                     }
-
-        other_vehicle_location = self.world.world.get_actor(self.actor.id + 1).get_location()
-
-        if ((other_vehicle_location.x > 0 and other_vehicle_location.y <= 33.8)
-            or (other_vehicle_location.x < -330 and other_vehicle_location.y < 75)):
-
-            if self.tick_count < tick_dict[self.world.args.scenario]:
-                self.tick_count += 1
-                ctrl.throttle = throttle
-                ctrl.steer = steer
-            else:
-                # brake
-                ctrl.throttle = 0
-                ctrl.steer = steer
-                ctrl.brake = 1
-        else:
-
-            ctrl.throttle = throttle
-            ctrl.steer = steer
+        ctrl.throttle = throttle
+        ctrl.steer = steer
 
         self.actor.apply_control(ctrl)
-        self.snapshot_printer()
+        
+        # TODO add argument to print snapshots
+        #self.snapshot_printer()
 
 
     def destroy(self):
