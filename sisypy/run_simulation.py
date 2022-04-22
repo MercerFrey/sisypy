@@ -94,7 +94,7 @@ def scenario_reader(scenario_file):
         actor_spawn_point_location = carla.Location(**attributes["spawn_point"]["location"])
         actor_spawn_point_rotation = carla.Rotation(**attributes["spawn_point"]["rotation"])
         
-        actor_way_points = [carla.Location(**point) for point in attributes["way_points"]]
+        actor_waypoints = [carla.Location(**point) for point in attributes["waypoints"]]
         actor_target_speed = attributes["target_speed"]
 
         
@@ -103,14 +103,14 @@ def scenario_reader(scenario_file):
             actor = Hero(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
-                waypoints = actor_way_points,
+                waypoints = actor_waypoints,
                 target_speed = actor_target_speed
             )
         else:
             actor = Other(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
-                waypoints = actor_way_points,
+                waypoints = actor_waypoints,
                 target_speed = actor_target_speed
             )
         actors.append(actor)

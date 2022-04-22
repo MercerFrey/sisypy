@@ -12,7 +12,7 @@
                 "roll": 0.0
             }
         },
-        "way_points": [
+        "waypoints": [
             {
                 "x": 300,
                 "y": 37.8,
@@ -39,7 +39,7 @@
                 "roll": 0.0
             }
         },
-        "way_points": [
+        "waypoints": [
             {
                 "x": -320,
                 "y": 37.8,
@@ -77,7 +77,7 @@
                 "roll": -0.179993
             }
         },
-        "way_points": [
+        "waypoints": [
             {
                 "x": -380,
                 "y": 37.8,
