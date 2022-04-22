@@ -5,7 +5,7 @@ from controller import PurePursuitController
 import utils
 
 class Hero(object):
-    def __init__(self, location, rotation, waypoints, target_speed):
+    def __init__(self, location, rotation, waypoints, target_speed_km):
         self.world = None
         self.actor = None
         self.control = None
@@ -13,7 +13,7 @@ class Hero(object):
         self.location = location
         self.rotation = rotation
         self.waypoints = waypoints
-        self.target_speed = target_speed  # meters per second
+        self.target_speed = target_speed_km / 3.6 # m/s  
         self.tick_count = 0
         self.log_filename = "log.txt"
 

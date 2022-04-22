@@ -7,8 +7,8 @@ from hud import InfoBar
 #from .hero import Hero
 from world import World
 from input_control import InputControl
-from hero_with_controller import Hero
-from other_with_controller import Other
+import hero_with_controller 
+import other_with_controller
 
 from color import *
 import utils
@@ -94,24 +94,26 @@ def scenario_reader(scenario_file):
         actor_spawn_point_location = carla.Location(**attributes["spawn_point"]["location"])
         actor_spawn_point_rotation = carla.Rotation(**attributes["spawn_point"]["rotation"])
         
-        actor_waypoints = [carla.Location(**point) for point in attributes["waypoints"]]
-        actor_target_speed = attributes["target_speed"]
+        actor_controller = attributes["controller"]
+        actor_waypoints = [carla.Location(**point) for point in actor_controller["waypoints"]]
+        actor_target_speed = actor_controller["target_speed"]["value"]
 
         
         actor = None
-        if actor_name == "hero":
-            actor = Hero(
+
+        if actor_controller["type"] == "hero_with_controller":
+            actor = hero_with_controller.Hero(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
                 waypoints = actor_waypoints,
-                target_speed = actor_target_speed
+                target_speed_km = actor_target_speed
             )
-        else:
-            actor = Other(
+        elif actor_controller["type"] == "other_with_controller":
+            actor = other_with_controller.Other(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
                 waypoints = actor_waypoints,
-                target_speed = actor_target_speed
+                target_speed_km = actor_target_speed
             )
         actors.append(actor)
 

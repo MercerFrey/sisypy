@@ -5,13 +5,13 @@ from controller import PurePursuitController
 
 
 class Other(object):
-    def __init__(self, location, rotation, waypoints, target_speed):
+    def __init__(self, location, rotation, waypoints, target_speed_km):
         self.world = None
         self.actor = None
         self.control = None
         self.controller = None
         self.waypoints = waypoints
-        self.target_speed = target_speed  # meters per second
+        self.target_speed = target_speed_km / 3.6  # meters per second
         self.location = location
         self.rotation = rotation
         self.tick_count = 0 
