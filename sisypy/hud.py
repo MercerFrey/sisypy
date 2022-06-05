@@ -126,28 +126,24 @@ class InfoBar(object):
         calculate_speed = lambda vehicle_speed: 3.6 * math.sqrt(
             vehicle_speed.x**2 + vehicle_speed.y**2 + vehicle_speed.z**2
             )
-        #if self.world.hero_actor is not None:
-        if True:
-            text = [
-                    [
-                    "{} ID:               {}".format(
-                        "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
-                         vehicle.id),
-                    "{} Vehicle:   {:>14}".format(
-                        "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
-                         get_actor_display_name(vehicle, truncate=14)),
-                    "{} Speed:           {:.0f} km/h".format(
-                        "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
-                        calculate_speed(vehicle.get_velocity())),
-                    "{} Location: {}".format(
-                        "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
-                         vehicle.get_location()),
-                    ]
-                for vehicle in sorted(self.world.get_vehicles(), key= lambda x: x.id)
+        text = [
+                [
+                "{} ID:               {}".format(
+                    "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
+                        vehicle.id),
+                "{} Vehicle:   {:>14}".format(
+                    "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
+                        get_actor_display_name(vehicle, truncate=14)),
+                "{} Speed:           {:.0f} km/h".format(
+                    "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
+                    calculate_speed(vehicle.get_velocity())),
+                "{} Location: {}".format(
+                    "EGO" if vehicle.attributes["role_name"] == "hero" else "OTHER",
+                        vehicle.get_location()),
                 ]
+            for vehicle in sorted(self.world.get_vehicles(), key= lambda x: x.id)
+            ]
 
-        else:
-            hero_mode_text = ["Hero Mode:                OFF"]
 
         info_text = [
             "Real:    % 16s FPS" % round(1 / self.world.fixed_delta_seconds),
