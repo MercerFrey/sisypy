@@ -1,11 +1,11 @@
+from turtle import distance
 import carla
-import json
 
 from controller import PurePursuitController
-import utils
+
 
 class Hero(object):
-    def __init__(self, location, rotation, waypoints, target_speed_km):
+    def __init__(self, location, rotation, waypoints, target_speed_km, actor_role):
         self.world = None
         self.actor = None
         self.control = None
@@ -13,16 +13,16 @@ class Hero(object):
         self.location = location
         self.rotation = rotation
         self.waypoints = waypoints
-        self.target_speed = target_speed_km / 3.6 # m/s  
+        self.target_speed = target_speed_km / 3.6  # km/h to m/s
+        self.actor_role = actor_role
         self.tick_count = 0
-        self.log_filename = "log.txt"
 
     def start(self, world):
         self.world = world
         spawn_point = carla.Transform(
             self.location, self.rotation
         )
-        self.actor = self.world.spawn_hero("vehicle.audi.tt", spawn_point)
+        self.actor = self.world.spawn_hero("vehicle.audi.tt", spawn_point, role_name = self.actor_role)
 
         self.controller = PurePursuitController()
 
@@ -38,12 +38,11 @@ class Hero(object):
         self.world.fixed_delta_seconds,
         )
 
+
         ctrl.throttle = throttle
         ctrl.steer = steer
 
         self.actor.apply_control(ctrl)
-        
-
 
 
     def destroy(self):
@@ -51,14 +50,3 @@ class Hero(object):
         if self.actor is not None:
             self.actor.destroy()
 
-# TODO this can be implemented in the utils.
-    def location_printer(self, interval):
-        self.tick_count += 1
-        if self.tick_count == interval:
-            print("""
-                {{ 
-                    "x": {x},
-                    "y": {y},
-                    "z": {z}
-                }},""".format(x=self.actor.get_location().x, y=self.actor.get_location().y, z=self.actor.get_location().z))
-            self.tick_count %= interval

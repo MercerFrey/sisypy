@@ -2,87 +2,127 @@ import argparse
 import pygame
 import carla
 import json
+import math
 
 from hud import InfoBar
 #from .hero import Hero
 from world import World
 from input_control import InputControl
-import hero_with_controller 
-import other_with_controller
+from hero_with_controller import Hero
+from other_with_controller import Other
 
 from color import *
-import utils
-
 
 def game_loop(args):
     """Initialized, Starts and runs all the needed modules for No Rendering Mode"""
     try:
-
         # Init Pygame
         pygame.init()
         display = pygame.display.set_mode(
-            (args.width, args.height), pygame.HWSURFACE | pygame.DOUBLEBUF
+            (args['width'], args['height']), pygame.HWSURFACE | pygame.DOUBLEBUF
         )
 
         # Place a title to game window
-        pygame.display.set_caption(args.description)
+        pygame.display.set_caption(args['description'])
 
         # Show loading screen
         font = pygame.font.Font(pygame.font.get_default_font(), 20)
         text_surface = font.render("Rendering map...", True, COLOR_WHITE)
         display.blit(
             text_surface,
-            text_surface.get_rect(center=(args.width / 2, args.height / 2)),
+            text_surface.get_rect(center=(args['width'] / 2, args['height'] / 2)),
         )
         pygame.display.flip()
 
         # Init
-        hud = InfoBar(args.width, args.height)
         input_control = InputControl()
-        world = World(args)
+        # TODO move world here
 
-        actors = scenario_reader(args.scenario)
-        # For each module, assign other modules that are going to be used inside that module
-        hud.start(world)
-        input_control.start(hud, world)
-        world.start(input_control)
+    except:
+        print("Initialization Error")
 
-        for actor in actors:
-            actor.start(world) 
 
-        # Game loop
-        clock = pygame.time.Clock()
-        while True:
-            clock.tick_busy_loop(500)
+    dict_max_lat_acc = dict()
+    list_lat_acc_list = []
+    
+    scenario_type = args['filename'].split(".")[0]
+    
+    for i in range(25):
+        try:
+            world = World(args)
+            hud = InfoBar(args['width'], args['height'])  
+            args['scenario'] = "par/par_{scenario_type}_{num}.json".format(scenario_type=scenario_type, num=i)
 
-            # Tick all modules
-            world.tick(clock)
+            actors = scenario_reader(args['scenario'])
+            # For each module, assign other modules that are going to be used inside that module
+            hud.start(world)
+            input_control.start(hud, world)
+            world.start(input_control)
+
             for actor in actors:
-                actor.tick(clock)
-        
-            hud.tick(clock)
-            input_control.tick(clock)
+                actor.start(world)
+            # Game loop
+            clock = pygame.time.Clock()
 
-            # Render all modules
-            display.fill(COLOR_ALUMINIUM_4)
-            world.render(display)
-            hud.render(display)
-            input_control.render(display)
+            # Max acc
+            max_lat_acc = 0
+            lat_acc_list = []
+            
+            while True:
+                clock.tick_busy_loop(500)
 
-            pygame.display.flip()
-
-            # if logfile specified prints logs to the file
-            if args.logfile:
-                utils.snapshot_printer(args.logfile, world.world)
+                # Tick all modules
+                world.tick(clock)
+                try:
+                    for actor in actors:
+                        actor.tick(clock)
                 
+                except RuntimeError:
+                    print(f'{scenario_type}: {i}')
+                    break
+                
+                # Current lateral acceleration for other1
+                curr_lat_acc = lat_acceleration_calculator(actors[1].actor, world.world.get_map())
+                lat_acc_list.append(curr_lat_acc)
+                if curr_lat_acc > max_lat_acc:
+                    max_lat_acc = curr_lat_acc
+        
 
-    except KeyboardInterrupt:
-        print("\nCancelled by user. Bye!")
+                hud.tick(clock)
+                input_control.tick(clock)
 
-    finally:
-         for actor in actors:
-            if actor is not None:
-                actor.destroy()
+                
+                # Render all modules
+                display.fill(COLOR_ALUMINIUM_4)
+                world.render(display)
+                hud.render(display)
+                input_control.render(display)
+
+                pygame.display.flip()
+
+        except KeyboardInterrupt:
+            print("\nCancelled by user. Bye!")
+
+        finally:
+            for actor in actors:
+                if actor is not None:
+                    actor.destroy()  
+            
+            dict_max_lat_acc[i] = max_lat_acc
+            list_lat_acc_list.append(lat_acc_list)
+            # print(f'max_lat_acc: {max_lat_acc}')
+            # return lat_acc_list, max_lat_acc
+    
+    
+    sorted_dict_max_lat = dict(sorted(dict_max_lat_acc.items(), key=lambda x: -x[1]))
+
+    critical_lat_acc_history = [list_lat_acc_list[index] for index in list(sorted_dict_max_lat)[:5]]
+
+    with open(f'{scenario_type}_critical_lat_acc_5.json', 'w') as f:
+        json.dump(critical_lat_acc_history, f) 
+
+    with open(f'{scenario_type}_max_lat_acc.json', 'w') as f:
+        json.dump(list(dict_max_lat_acc.values()), f)
 
 
 
@@ -94,32 +134,50 @@ def scenario_reader(scenario_file):
         actor_spawn_point_location = carla.Location(**attributes["spawn_point"]["location"])
         actor_spawn_point_rotation = carla.Rotation(**attributes["spawn_point"]["rotation"])
         
-        actor_controller = attributes["controller"]
-        actor_waypoints = [carla.Location(**point) for point in actor_controller["waypoints"]]
-        actor_target_speed = actor_controller["target_speed"]["value"]
+        actor_way_points = [carla.Location(**point) for point in attributes["way_points"]]
+        actor_target_speed = attributes["target_speed"]["value"]
 
         
         actor = None
-
-        if actor_controller["type"] == "hero_with_controller":
-            actor = hero_with_controller.Hero(
+        if actor_name == "hero":
+            actor = Hero(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
-                waypoints = actor_waypoints,
-                target_speed_km = actor_target_speed
+                waypoints = actor_way_points,
+                target_speed_km = actor_target_speed,
+                actor_role = actor_name,
             )
-        elif actor_controller["type"] == "other_with_controller":
-            actor = other_with_controller.Other(
+        else:
+            actor = Other(
                 location = actor_spawn_point_location,
                 rotation = actor_spawn_point_rotation,
-                waypoints = actor_waypoints,
-                target_speed_km = actor_target_speed
+                waypoints = actor_way_points,
+                target_speed_km = actor_target_speed,
+                actor_role = actor_name,
             )
         actors.append(actor)
 
     return actors
 
-def main():
+# Return current lateral acceleration according to the road.
+def lat_acceleration_calculator(actor, map):
+
+    waypoint = map.get_waypoint(actor.get_location(), project_to_road=True, lane_type=carla.LaneType.Driving)
+    road_yaw = waypoint.transform.rotation.yaw
+    actor_yaw = actor.get_transform().rotation.yaw
+
+    
+    curr_acc_vector = actor.get_acceleration()
+    
+    curr_lat_acc= abs(
+                (curr_acc_vector.x * math.sin(actor_yaw - road_yaw))
+                - (curr_acc_vector.y * math.cos(actor_yaw - road_yaw))
+                )
+
+    return curr_lat_acc
+
+
+def run_simulation():
     """Parses the arguments received from commandline and runs the game loop"""
 
     # Define arguments that will be received and parsed
@@ -168,14 +226,8 @@ def main():
     argparser.add_argument(
         "--scenario",
         metavar="scenario_1.json",
-        default="examples/scenario_1.json",
+        default="scenario_1.json",
         help='scenario file',
-    )
-
-    argparser.add_argument(
-        "--logfile",
-        metavar="logs.txt",
-        help="in order to print logs into the logfile",
     )
 
 
@@ -184,9 +236,6 @@ def main():
     args.description = "BounCMPE CarlaSim 2D Visualizer"
     args.width, args.height = [int(x) for x in args.res.split("x")]
 
-
+    args = vars(args)
     # Run game loop
     game_loop(args)
-
-
-main()
