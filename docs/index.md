@@ -1,4 +1,4 @@
-# Term Project For CMPE486 Simulation Based Testing of Autonomous Systems
+# Sisypy Results For Cut-out Scenario
 
 This project is about creating tests with an open-source simulation, Carla. What we investigated in this project is called a cut-out scenario. Three cars are in the same lane. The first car is slower than the other two, and the car in the middle changes lane. The last car is the autonomous one, called Ego. In our tests, we investigate the Ego car's movements to ensure autonomous cars are safe on the roads.
 
