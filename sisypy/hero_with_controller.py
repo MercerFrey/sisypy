@@ -1,7 +1,6 @@
-from turtle import distance
 import carla
 
-from controller import PurePursuitController
+from .controller import PurePursuitController
 
 
 class Hero(object):

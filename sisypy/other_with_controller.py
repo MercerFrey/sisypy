@@ -1,10 +1,7 @@
-from turtle import distance
 import carla
 import math
-from matplotlib.backend_bases import LocationEvent
 
-from controller import PurePursuitController
-from controller import PIDController
+from .controller import PurePursuitController
 
 class Other(object):
     def __init__(self, location, rotation, waypoints, target_speed_km, actor_role):

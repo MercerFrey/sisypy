@@ -1,5 +1,9 @@
-
 import argparse
+import subprocess
+
+from .run_simulation import game_loop, run_simulation
+
+from .parametrization_engine import parametrize
 
 def main():
     
@@ -9,24 +13,50 @@ def main():
     scenario_group.add_argument(
         "-c", 
         "--concrete",
-        metavar="concrete_scenario.json",
-        default=None,
-        help="concrete scenario json",
+        action='store_true',
+        help="concrete scenario",
     )
+
     scenario_group.add_argument(
-        "-a",
-        "--abstract",
-        metavar="abstract_scenario.json",
+        "-p",
+        "--parametrize",
+        action='store_true',
+        help="parameterization",
+    )
+
+    scenario_group.add_argument(
+        "--scenario_type",
+        metavar="straight",
+        default="straight",
+        help="straight or curved",
+    )
+
+    scenario_group.add_argument(
+        "-m",
+        "--map",
+        metavar="Town01",
         default=None,
-        help="abstract scenario",
+        help="change world map",
+    )
+
+    scenario_group.add_argument(
+        "-f", 
+        "--filename",
+        metavar="straigth.json",
+        default="straight.json",
+        help="filename",
     )
 
     # Parse arguments
     args = argparser.parse_args()
     args.description = "Sisypy"
 
-    if args.concrete:
-        print(args.concrete)
-    elif args.abstract: print(args.abstract)
-    else: argparser.print_help()
-
+    if args.map:
+        subprocess.call(f"python sisypy/config.py -m {args.map}", shell=True)    
+    elif args.parametrize:
+        parametrize(args.scenario_type)
+    elif args.concrete:
+        # TODO does not work for one single simulation
+        game_loop(args.filename)
+    else:
+        argparser.print_help()

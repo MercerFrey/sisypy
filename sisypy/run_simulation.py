@@ -4,17 +4,31 @@ import carla
 import json
 import math
 
-from hud import InfoBar
+from .hud import InfoBar
 #from .hero import Hero
-from world import World
-from input_control import InputControl
-from hero_with_controller import Hero
-from other_with_controller import Other
+from .world import World
+from .input_control import InputControl
+from .hero_with_controller import Hero
+from .other_with_controller import Other
 
-from color import *
+from .color import *
 
-def game_loop(args):
+def game_loop(filename):
     """Initialized, Starts and runs all the needed modules for No Rendering Mode"""
+    args = {
+        'host': '127.0.0.1',
+        'port': 2000,
+        'tm_port': 8000, 
+        'timeout': 2.0, 
+        'res': '1280x720', 
+        'filter': 'vehicle.audi.*', 
+        'scenario': 'curved.json', 
+        'description': 'BounCMPE CarlaSim 2D Visualizer',
+        'width': 1280,
+        'height': 720
+        }
+    args["filename"] = filename
+    
     try:
         # Init Pygame
         pygame.init()

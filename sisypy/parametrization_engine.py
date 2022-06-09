@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import json
 import argparse
 
-import run_simulation
-import print_plot 
+from .run_simulation import game_loop
+from .print_plot import print_plot 
 
 # pick 25 appropriate samples from 100 samples.
 def sample_25_with_limits(xlimits):
@@ -46,31 +46,7 @@ def write_scenario_speeds(scenario_filename, scenario, speed_list):
 
         write_to_json(scenario, "par/par_{}_{}.json".format(scenario_filename, i))
 
-def main(): 
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument(
-        "--scenario",
-        metavar="straight",
-        default="straight",
-        help="Straight or curved (default: straight)",
-    )
-    
-    scenario_type = argparser.parse_args().scenario
-    print(scenario_type)
-    
-    args = {
-        'host': '127.0.0.1',
-        'port': 2000,
-        'tm_port': 8000, 
-        'timeout': 2.0, 
-        'res': '1280x720', 
-        'filter': 'vehicle.audi.*', 
-        'scenario': 'curved.json', 
-        'description': 'BounCMPE CarlaSim 2D Visualizer',
-        'width': 1280,
-        'height': 720
-        }
-
+def parametrize(scenario_type): 
 
     scenario, xlimits = read_scenario_speeds(f'scenario_files/{scenario_type}.json')
     samples = sample_25_with_limits(xlimits)
@@ -82,8 +58,7 @@ def main():
 
     write_scenario_speeds(scenario_type, scenario, samples)
     
-    args["filename"] = f'{scenario_type}.json'
-    run_simulation.game_loop(args)
+    game_loop(f'{scenario_type}.json')
 
 
     # print plots and save them
@@ -95,6 +70,3 @@ def main():
     print_plot.print_plot("max_histogram", f'scenario_files/{scenario_type}_max_lat_acc.json')
     for i in range(5):
         print_plot.print_plot("top_5", f'scenario_files/{scenario_type}_critical_lat_acc_5.json', index=i)
-
-
-main()
