@@ -43,7 +43,7 @@ def main():
         "-f", 
         "--filename",
         metavar="straigth.json",
-        default="straight.json",
+        default="examples/scenario_1.json",
         help="filename",
     )
 

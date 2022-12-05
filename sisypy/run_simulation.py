@@ -60,74 +60,74 @@ def game_loop(filename):
     list_lat_acc_list = []
     
     scenario_type = args['filename'].split(".")[0]
-    
-    for i in range(25):
-        try:
-            world = World(args)
-            hud = InfoBar(args['width'], args['height'])  
-            args['scenario'] = "par/par_{scenario_type}_{num}.json".format(scenario_type=scenario_type, num=i)
 
-            actors = scenario_reader(args['scenario'])
-            # For each module, assign other modules that are going to be used inside that module
-            hud.start(world)
-            input_control.start(hud, world)
-            world.start(input_control)
+    try:
+        world = World(args)
+        hud = InfoBar(args['width'], args['height'])  
+        #args['scenario'] = "par/par_{scenario_type}_{num}.json".format(scenario_type=scenario_type, num=i)
 
-            for actor in actors:
-                actor.start(world)
-            # Game loop
-            clock = pygame.time.Clock()
+        actors = scenario_reader(args['filename'])
+        # For each module, assign other modules that are going to be used inside that module
+        hud.start(world)
+        input_control.start(hud, world)
+        world.start(input_control)
 
-            # Max acc
-            max_lat_acc = 0
-            lat_acc_list = []
-            
-            while True:
-                clock.tick_busy_loop(500)
+        for actor in actors:
+            actor.start(world)
+        # Game loop
+        clock = pygame.time.Clock()
 
-                # Tick all modules
-                world.tick(clock)
-                try:
-                    for actor in actors:
-                        actor.tick(clock)
-                
-                except RuntimeError:
-                    print(f'{scenario_type}: {i}')
-                    break
-                
-                # Current lateral acceleration for other1
-                curr_lat_acc = lat_acceleration_calculator(actors[1].actor, world.world.get_map())
-                lat_acc_list.append(curr_lat_acc)
-                if curr_lat_acc > max_lat_acc:
-                    max_lat_acc = curr_lat_acc
+        # Max acc
+        max_lat_acc = 0
+        lat_acc_list = []
         
+        while True:
+            clock.tick_busy_loop(500)
 
-                hud.tick(clock)
-                input_control.tick(clock)
-
-                
-                # Render all modules
-                display.fill(COLOR_ALUMINIUM_4)
-                world.render(display)
-                hud.render(display)
-                input_control.render(display)
-
-                pygame.display.flip()
-
-        except KeyboardInterrupt:
-            print("\nCancelled by user. Bye!")
-
-        finally:
-            for actor in actors:
-                if actor is not None:
-                    actor.destroy()  
+            # Tick all modules
+            world.tick(clock)
+            try:
+                for actor in actors:
+                    actor.tick(clock)
             
-            dict_max_lat_acc[i] = max_lat_acc
-            list_lat_acc_list.append(lat_acc_list)
-            # print(f'max_lat_acc: {max_lat_acc}')
-            # return lat_acc_list, max_lat_acc
+            except RuntimeError:
+                #print(f'{scenario_type}: {i}')
+                print("Runtime")
+                break
+            
+            # Current lateral acceleration for other1
+            curr_lat_acc = lat_acceleration_calculator(actors[1].actor, world.world.get_map())
+            lat_acc_list.append(curr_lat_acc)
+            if curr_lat_acc > max_lat_acc:
+                max_lat_acc = curr_lat_acc
     
-    
+
+            hud.tick(clock)
+            input_control.tick(clock)
+
+            
+            # Render all modules
+            display.fill(COLOR_ALUMINIUM_4)
+            world.render(display)
+            hud.render(display)
+            input_control.render(display)
+
+            pygame.display.flip()
+
+    except KeyboardInterrupt:
+        print("\nCancelled by user. Bye!")
+
+    finally:
+        for actor in actors:
+            if actor is not None:
+                actor.destroy()  
+        
+        dict_max_lat_acc[i] = max_lat_acc
+        list_lat_acc_list.append(lat_acc_list)
+        # print(f'max_lat_acc: {max_lat_acc}')
+        # return lat_acc_list, max_lat_acc
+
+
     sorted_dict_max_lat = dict(sorted(dict_max_lat_acc.items(), key=lambda x: -x[1]))
 
     critical_lat_acc_history = [list_lat_acc_list[index] for index in list(sorted_dict_max_lat)[:5]]
