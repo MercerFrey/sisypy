@@ -11,6 +11,7 @@ import logging
 from carla import TrafficLightState as tls
 
 from .color import *
+from .rss_sensor import RssSensor
 
 PIXELS_PER_METER = 12
 HERO_DEFAULT_SCALE = 1.0
@@ -682,6 +683,9 @@ class World(object):
         self.traffic_light_surfaces = TrafficLightSurfaces()
         self.affected_traffic_light = None
 
+        # Rss Sensor 
+        self.rss_sensor = None
+
         # Map info
         self.map_image = None
         self.border_round_surface = None
@@ -825,6 +829,7 @@ class World(object):
         if role_name == "hero":
             self.hero_actor = actor
             self.hero_transform = self.hero_actor.get_transform()
+            self.rss_sensor = RssSensor(self.hero_actor, self.world)
 
         return actor
 
@@ -1192,3 +1197,5 @@ class World(object):
         """Destroy the hero actor when class instance is destroyed"""
         if self.spawned_hero is not None:
             self.spawned_hero.destroy()
+        if self.rss_sensor:
+            self.rss_sensor.destroy()

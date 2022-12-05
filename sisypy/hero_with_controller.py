@@ -16,6 +16,10 @@ class Hero(object):
         self.actor_role = actor_role
         self.tick_count = 0
 
+        #RSS
+        self.vehicle_physics = None
+        self.restrictor = carla.RssRestrictor()
+
     def start(self, world):
         self.world = world
         spawn_point = carla.Transform(
@@ -24,24 +28,34 @@ class Hero(object):
         self.actor = self.world.spawn_hero("vehicle.audi.tt", spawn_point, role_name = self.actor_role)
 
         self.controller = PurePursuitController()
-
+        
+        self.vehicle_physics = self.world.hero_actor.get_physics_control()
+        
         self.world.register_actor_waypoints_to_draw(self.actor, self.waypoints)
         #self.actor.set_autopilot(True, world.args.tm_port)
 
     def tick(self, clock):
-        ctrl = carla.VehicleControl()
+        vehicle_control = carla.VehicleControl()
         throttle, steer = self.controller.get_control(
-        self.actor,
-        self.waypoints,
-        self.target_speed,
-        self.world.fixed_delta_seconds,
+            self.actor,
+            self.waypoints,
+            self.target_speed,
+            self.world.fixed_delta_seconds,
         )
+        vehicle_control.throttle = throttle
+        vehicle_control.steer = steer
+        
+        print("helloo")
+        print(self.restrictor)
+        if self.restrictor:
+            rss_proper_response = self.world.rss_sensor.proper_response if self.world.rss_sensor and self.world.rss_sensor.response_valid else None
+            print(rss_proper_response)
+        if rss_proper_response:
+            vehicle_control = self.restrictor.restrict_vehicle_control(vehicle_control, rss_proper_response, self.world.rss_sensor.ego_dynamics_on_route, self.vehicle_physics)
 
+  
 
-        ctrl.throttle = throttle
-        ctrl.steer = steer
-
-        self.actor.apply_control(ctrl)
+        self.actor.apply_control(vehicle_control)
 
 
     def destroy(self):
